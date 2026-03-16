@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,17 +17,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        User::create([
-            'name' => 'admin',
-            'email' => 'admin@email.com',
-            'password' => Hash::make('123123123')
+        $this->call([
+            BoardGroupSeeder::class,
+            BoardSeeder::class,
         ]);
+
+        User::updateOrCreate(
+            ['email' => 'admin@email.com'],
+            [
+                'name' => 'admin',
+                'password' => Hash::make('123123123'),
+            ]
+        );
+        
+        User::factory(10)->create();
+        Post::factory(50)->create();
     }
 }
