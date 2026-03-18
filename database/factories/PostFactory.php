@@ -6,7 +6,6 @@ use App\Models\Board;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Post>
@@ -20,7 +19,6 @@ class PostFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->sentence();
         $board = Board::query()
             ->where('slug', '!=', 'notice')
             ->inRandomOrder()
@@ -30,10 +28,8 @@ class PostFactory extends Factory
         return [
             'board_id' => $board?->id,
             'user_id' => $user?->id,
-            'title' => $title,
-            'slug' => Str::slug($title) . '-' . fake()->unique()->numberBetween(1000, 9999),
+            'title' => fake()->sentence(),
             'content' => fake()->realText(1200),
-            'excerpt' => fake()->text(120),
             'author_name_snapshot' => $user?->name ?? fake()->userName(),
             'status' => 'published',
             'is_notice' => false,

@@ -6,8 +6,8 @@
   'bodyClass' => null,
 ])
 
-<section class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-  <div class="mb-4 flex items-center justify-between">
+<section class="rounded-2xl border border-stone-200 bg-white p-3 shadow-sm">
+  <div class="mb-2 flex items-center justify-between">
     <h2 class="text-base font-semibold text-zinc-900">{{ $title }}</h2>
 
     @if (!empty($actionUrl) && !empty($actionLabel))

@@ -23,9 +23,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->string('title');
-            $table->string('slug')->nullable()->unique();
             $table->longText('content');
-            $table->text('excerpt')->nullable();
             $table->string('author_name_snapshot');
             
             $table->enum('status', ['published', 'hidden', 'deleted'])->default('published');

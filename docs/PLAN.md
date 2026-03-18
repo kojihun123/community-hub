@@ -245,7 +245,7 @@
 - 정렬
 - 페이지네이션
 
-#### `/posts/{id}`
+#### `/boards/{board:slug}/posts/{post}`
 
 게시글 상세 페이지
 
@@ -256,11 +256,11 @@
 - 댓글 / 대댓글
 - 신고 버튼
 
-#### `/posts/create`
+#### `/boards/{board:slug}/posts/create`
 
 게시글 작성 페이지
 
-#### `/posts/{id}/edit`
+#### `/boards/{board:slug}/posts/{post}/edit`
 
 게시글 수정 페이지
 
@@ -387,9 +387,7 @@
 | board_id | bigint | `boards.id` FK |
 | user_id | bigint | `users.id` FK |
 | title | string | 제목 |
-| slug | string nullable | 선택적 slug |
 | content | longText | 본문 |
-| excerpt | text nullable | 요약 |
 | author_name_snapshot | string | 작성자명 스냅샷 |
 | status | enum | `published`, `hidden`, `deleted` |
 | is_notice | boolean | 공지 여부 |
@@ -501,9 +499,27 @@
 
 운영자가 게시글/댓글을 숨기거나 사용자를 제재한 경우에도 알림을 생성해 사유를 전달한다.
 
-### Optional `attachments`
+### `attachments`
 
-- 게시글 첨부 이미지 또는 파일 업로드용
+게시글 첨부 이미지 또는 파일 업로드용
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | bigint | PK |
+| post_id | bigint nullable | `posts.id` FK |
+| user_id | bigint nullable | `users.id` FK |
+| type | string | `image`, `file` |
+| original_name | string | 원본 파일명 |
+| path | string | storage 내부 경로 |
+| mime_type | string | MIME 타입 |
+| size | unsignedBigInteger | 파일 크기 |
+| is_temporary | boolean | 임시 업로드 여부 |
+| created_at | timestamp | 생성일 |
+| updated_at | timestamp | 수정일 |
+
+- 에디터 업로드 시 먼저 임시 첨부로 저장한다.
+- 글 저장 시 본문에 실제로 사용된 첨부만 `post_id`와 연결한다.
+- 글 저장 없이 남은 임시 첨부는 주기적으로 정리한다.
 
 ## Application Structure
 
@@ -624,6 +640,7 @@
 - 읽기 많은 구간 우선 최적화
 - Rate Limit 적용
 - 파일 / 이미지 분리
+- 임시 첨부 정리 정책
 - 로그와 측정 기반 개선
 
 ## MVP Scope
@@ -725,7 +742,7 @@
 8. 프로필, 내가 쓴 글/댓글/북마크 화면 구현
 9. 관리자 대시보드 및 운영 기능 구현
 10. 검색, 페이지네이션, eager loading 적용
-11. 이미지 업로드 및 Alpine.js 인터랙션 추가
+11. 이미지 업로드 / 임시 첨부 연결 / Alpine.js 인터랙션 추가
 12. API 구현
 13. Event / Job 적용
 14. Broadcasting / Reverb / Echo 기반 실시간 알림 적용

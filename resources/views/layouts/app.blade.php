@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield ('title', 'CommunityHub')</title>
   @vite (['resources/css/app.css', 'resources/js/app.js'])
   <style>
@@ -16,7 +17,7 @@
   <div class="flex min-h-screen flex-col">
     @include ('components.nav.main-nav')
 
-    <div class="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:py-5">
+    <div class="mx-auto w-full max-w-6xl flex-1 px-4 py-2 md:py-3">
       @include ('components.ui.flash-message')
 
       <main class="grid gap-6">
