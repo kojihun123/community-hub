@@ -4,8 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Mews\Purifier\Facades\Purifier;
 
-class StorePostRequest extends FormRequest
+class PostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,7 +20,7 @@ class StorePostRequest extends FormRequest
     {
         $this->merge([
             'title' => trim((string) $this->input('title')),
-            'content' => trim((string) $this->input('content')),
+            'content' => Purifier::clean(trim((string) $this->input('content'))),
         ]);
     }
 

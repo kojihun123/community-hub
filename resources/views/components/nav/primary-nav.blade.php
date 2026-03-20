@@ -48,12 +48,13 @@
           placeholder="통합검색"
           class="h-10 w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 text-sm text-white outline-none placeholder:text-zinc-400 focus:border-zinc-500"
         />
-        <button
+        <x-ui.button
           type="submit"
-          class="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-white px-3 text-sm font-medium text-zinc-900"
+          variant="secondary"
+          class="h-10 shrink-0 rounded-xl border-0 bg-white px-3 text-zinc-900 hover:bg-stone-100"
         >
           검색
-        </button>
+        </x-ui.button>
       </form>
 
       <nav class="flex flex-col gap-1">
@@ -101,12 +102,13 @@
             @endif
             <form method="POST" action="{{ url('/logout') }}">
               @csrf
-              <button
+              <x-ui.button
                 type="submit"
-                class="w-full rounded-xl bg-rose-500/15 px-3 py-2 text-left font-medium text-rose-200 transition hover:bg-rose-500/25"
+                variant="ghost"
+                class="w-full justify-start rounded-xl bg-rose-500/15 px-3 py-2 font-medium text-rose-200 hover:bg-rose-500/25 hover:text-rose-100"
               >
                 로그아웃
-              </button>
+              </x-ui.button>
             </form>
           @else
             <a
@@ -114,11 +116,13 @@
               class="rounded-xl px-3 py-2 text-white/90 transition hover:bg-white/10"
               >로그인</a
             >
-            <a
-              href="{{ url('/register') }}"
-              class="rounded-xl bg-white px-3 py-2 font-medium text-zinc-900 transition hover:bg-stone-100"
-              >회원가입</a
+            <x-ui.link-button
+              :href="url('/register')"
+              variant="secondary"
+              class="justify-start rounded-xl border-0 bg-white px-3 py-2 text-zinc-900 hover:bg-stone-100"
             >
+              회원가입
+            </x-ui.link-button>
           @endauth
         </div>
       </div>

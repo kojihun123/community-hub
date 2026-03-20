@@ -2,6 +2,7 @@
   'title',
   'actionUrl' => null,
   'actionLabel' => null,
+  'actionVariant' => 'ghost',
   'actionClass' => 'text-sm text-zinc-500 transition hover:text-zinc-900',
   'bodyClass' => null,
 ])
@@ -11,12 +12,13 @@
     <h2 class="text-base font-semibold text-zinc-900">{{ $title }}</h2>
 
     @if (!empty($actionUrl) && !empty($actionLabel))
-      <a
-        href="{{ url($actionUrl) }}"
+      <x-ui.link-button
+        :href="$actionUrl"
+        :variant="$actionVariant"
         class="{{ $actionClass }}"
       >
         {{ $actionLabel }}
-      </a>
+      </x-ui.link-button>
     @endif
   </div>
 

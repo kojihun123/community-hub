@@ -1,6 +1,6 @@
 import {
     AutoImage,
-    SimpleUploadAdapter,
+    Alignment,
     BlockQuote,
     Bold,
     ClassicEditor,
@@ -18,6 +18,12 @@ import {
     List,
     Paragraph,
     PictureEditing,
+    RemoveFormat,
+    SimpleUploadAdapter,
+    Table,
+    TableCellProperties,
+    TableProperties,
+    TableToolbar,
 } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 
@@ -43,6 +49,7 @@ const initPostEditor = () => {
             Link,
             List,
             BlockQuote,
+            RemoveFormat,
             Image,
             ImageCaption,
             ImageInsert,
@@ -51,6 +58,11 @@ const initPostEditor = () => {
             ImageToolbar,
             ImageUpload,
             PictureEditing,
+            Alignment, 
+            Table, 
+            TableCellProperties,
+            TableProperties,
+            TableToolbar
         ],
         toolbar: [
             'undo',
@@ -60,14 +72,18 @@ const initPostEditor = () => {
             '|',
             'bold',
             'italic',
-            'link',
+            'blockQuote',
             '|',
-            'insertImage',
+            'alignment',
             '|',
             'bulletedList',
             'numberedList',
             '|',
-            'blockQuote',
+            'link',
+            'insertImage',
+            'insertTable',
+            '|',
+            'removeFormat',
         ],
         image: {
             toolbar: [
@@ -90,6 +106,15 @@ const initPostEditor = () => {
                     .querySelector('meta[name="csrf-token"]')
                     ?.getAttribute('content'),
             },
+        },
+        table: {
+            contentToolbar: [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells',
+                'tableProperties',
+                'tableCellProperties',
+            ],
         },
     })
         .then((editor) => {

@@ -6,9 +6,10 @@
   <div class="space-y-3">
     <x-ui.section-card
       :title="$board->name"
-      :action-url="'/boards/' . $board->slug . '/posts/create'"
-      action-label="글쓰기"
-      action-class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+      :action-url="auth()->check() ? route('posts.create', $board) : null"
+      action-variant="primary"
+      :action-label="auth()->check() ? '글쓰기' : null"
+      action-class=""
     >
       @if (!empty($board->description))
         <p class="text-sm text-zinc-500">{{ $board->description }}</p>
@@ -24,7 +25,7 @@
         @forelse ($board->posts as $post)
           <li>
             <a
-              href="{{ url('/boards/' . $board->slug . '/posts/' . $post->id) }}"
+              href="{{ route('posts.show', [$board, $post]) }}"
               class="block px-4 py-4 transition hover:bg-stone-50"
             >
               <div class="flex items-start justify-between gap-3">
@@ -68,7 +69,7 @@
           @forelse ($board->posts as $post)
             <li>
               <a
-                href="{{ url('/boards/' . $board->slug . '/posts/' . $post->id) }}"
+                href="{{ route('posts.show', [$board, $post]) }}"
                 class="grid grid-cols-[4rem_minmax(0,1fr)_6rem_6rem_5rem_5rem] gap-3 px-4 py-3 text-sm text-zinc-700 transition hover:bg-stone-50"
               >
                 <span class="text-zinc-500">{{ $post->id }}</span>

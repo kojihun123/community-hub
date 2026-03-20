@@ -520,6 +520,7 @@
 - 에디터 업로드 시 먼저 임시 첨부로 저장한다.
 - 글 저장 시 본문에 실제로 사용된 첨부만 `post_id`와 연결한다.
 - 글 저장 없이 남은 임시 첨부는 주기적으로 정리한다.
+- 스케줄러로 오래된 임시 첨부 이미지를 삭제하는 정리 작업을 추가한다.
 
 ## Application Structure
 
@@ -541,7 +542,7 @@
 
 ### Requests
 
-- `StorePostRequest`
+- `PostRequest`
 - `UpdatePostRequest`
 - `StoreCommentRequest`
 - `StoreReportRequest`

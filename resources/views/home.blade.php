@@ -46,7 +46,7 @@
             ],
         ];
     @endphp
-  <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
+  <div class="grid gap-3 lg:grid-cols-[2fr_1fr]">
     <div class="space-y-3">
       @include ('partials.home.post-list-section', [
                 'title' => '인기글',
