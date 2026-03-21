@@ -7,6 +7,7 @@ use App\Models\Attachment;
 use App\Models\Board;
 use App\Models\Post;
 use DOMDocument;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
@@ -40,6 +41,18 @@ class PostController extends Controller
             ]);
         } else {
             $post->setAttribute('is_liked_by_user', false);
+        }
+
+        $viewerKey = 'viewer:' . md5(request()->ip() . '|' . request()->userAgent());
+        $userAgent = strtolower((string) request()->userAgent());
+        $isBot = str_contains($userAgent, 'bot')
+            || str_contains($userAgent, 'crawl')
+            || str_contains($userAgent, 'spider');
+
+        $postViewKey = 'post:viewed:' . $post->id . ':' . $viewerKey;
+
+        if (! $isBot && Cache::add($postViewKey, true, now()->addDay())) {
+            $post->increment('view_count');
         }
 
         return view('posts.show', compact('post'));
