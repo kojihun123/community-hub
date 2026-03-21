@@ -20,15 +20,40 @@ class BoardController extends Controller
         return view('boards.index', compact('board_groups'));
     }
 
-    public function show($slug){
-        $board = Board::where('is_active', true)
-            ->with(['posts' => function($query){
-                $query->where('status', 'published')
-                    ->latest();
-            }])
-            ->where('slug', $slug)
-            ->firstOrFail();
+    public function show(Board $board, Request $request)
+    {
+        abort_if(! $board->is_active, 404);
 
-        return view('boards.show', compact('board'));
+        $keyword = trim((string) $request->input('q'));
+        $field = $request->input('field', 'title');
+
+        $allowedFields = ['id', 'title', 'author'];
+
+        if (! in_array($field, $allowedFields, true)) {
+            $field = 'title';
+        }
+
+        $posts = $board->posts()
+            ->where('status', 'published')
+            ->when($keyword !== '', function ($query) use ($field, $keyword) {
+                if ($field === 'id' && ctype_digit($keyword)) {
+                    $query->whereKey((int) $keyword);
+
+                    return;
+                }
+
+                if ($field === 'author') {
+                    $query->where('author_name_snapshot', 'like', "%{$keyword}%");
+
+                    return;
+                }
+
+                $query->where('title', 'like', "%{$keyword}%");
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('boards.show', compact('board', 'posts', 'field', 'keyword'));
     }
 }

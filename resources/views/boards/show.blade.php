@@ -17,12 +17,45 @@
     </x-ui.section-card>
 
     <section class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+      <div class="border-b border-stone-200 bg-stone-50/70 px-4 py-3">
+        <form method="get" action="{{ route('boards.show', $board) }}" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <select
+            name="field"
+            class="h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-500 sm:w-28"
+          >
+            <option value="id" @selected(($field ?? request('field', 'title')) === 'id')>ID</option>
+            <option value="title" @selected(($field ?? request('field', 'title')) === 'title')>제목</option>
+            <option value="author" @selected(($field ?? request('field', 'title')) === 'author')>글쓴이</option>
+          </select>
+
+          <input
+            type="text"
+            name="q"
+            value="{{ $keyword ?? request('q') }}"
+            placeholder="검색어를 입력하세요"
+            class="h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-500"
+          />
+
+          <div class="flex shrink-0 items-center gap-2">
+            <x-ui.button type="submit" class="h-11 whitespace-nowrap">
+              검색
+            </x-ui.button>
+
+            @if (filled(request('q')))
+              <x-ui.link-button :href="route('boards.show', $board)" variant="secondary" class="h-11 whitespace-nowrap">
+                초기화
+              </x-ui.link-button>
+            @endif
+          </div>
+        </form>
+      </div>
+
       <div class="border-b border-stone-200 px-4 py-3 md:hidden">
         <h3 class="text-sm font-semibold text-zinc-900">게시글 목록</h3>
       </div>
 
       <ul class="divide-y divide-stone-100 md:hidden">
-        @forelse ($board->posts as $post)
+        @forelse ($posts as $post)
           <li>
             <a
               href="{{ route('posts.show', [$board, $post]) }}"
@@ -66,7 +99,7 @@
         </div>
 
         <ul class="divide-y divide-stone-100">
-          @forelse ($board->posts as $post)
+          @forelse ($posts as $post)
             <li>
               <a
                 href="{{ route('posts.show', [$board, $post]) }}"
@@ -87,6 +120,13 @@
           @endforelse
         </ul>
       </div>
+
+      @if ($posts->hasPages())
+        <div class="border-t border-stone-200 px-4 py-4">
+          {{ $posts->links() }}
+        </div>
+      @endif
+    
     </section>
   </div>
 @endsection
