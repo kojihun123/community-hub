@@ -32,6 +32,16 @@ class PostController extends Controller
             },
         ]);
 
+        if (auth()->check()) {
+            $post->loadExists([
+                'likes as is_liked_by_user' => function ($query) {
+                    $query->where('user_id', auth()->id());
+                },
+            ]);
+        } else {
+            $post->setAttribute('is_liked_by_user', false);
+        }
+
         return view('posts.show', compact('post'));
     }
 

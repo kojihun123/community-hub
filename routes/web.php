@@ -4,6 +4,7 @@ use App\Http\Controllers\BoardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostAttachmentUploadController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +41,11 @@ Route::scopeBindings()->group(function () {
         ->name('comments.update');          
 
         Route::delete('/boards/{board:slug}/{post}/comments/{comment}', [CommentController::class, 'destroy'])
-        ->name('comments.destroy');        
+        ->name('comments.destroy');   
+        
+        //좋아요
+        Route::post('/boards/{board:slug}/{post}/likes', [PostLikeController::class, 'store'])
+        ->name('posts.likes.store');
             
     });
 

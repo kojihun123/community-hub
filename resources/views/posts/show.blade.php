@@ -48,12 +48,14 @@
           </x-ui.link-button>
 
           <div class="flex flex-wrap items-center gap-2">
-
-            <x-ui.button type="button" variant="like">
-              좋아요 {{ number_format($post->like_count) }}
-            </x-ui.button>
-
             @auth
+
+              <form method="post" action="{{ route('posts.likes.store', [$post->board, $post]) }}">
+                @csrf
+                <x-ui.button type="submit" variant="{{ $post->is_liked_by_user ? 'danger' : 'success' }}">
+                  좋아요 {{ number_format($post->like_count) }}
+                </x-ui.button>
+              </form>            
             
               @can('update', $post)     
                 <x-ui.link-button

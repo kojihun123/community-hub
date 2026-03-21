@@ -26,6 +26,11 @@ class CommentController extends Controller
         }
 
         DB::transaction(function () use ($post, $data, $parent, $contentField) {
+
+            $lockedPost = Post::whereKey($post->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             Comment::create([
                 'post_id' => $post->id,
                 'user_id' => auth()->id(),
@@ -34,7 +39,11 @@ class CommentController extends Controller
                 'author_name_snapshot' => auth()->user()->name,
             ]);
 
-            $post->increment('comment_count');
+            $lockedPost->update([
+                'comment_count' => $lockedPost->comments()
+                    ->where('status', 'visible')
+                    ->count(),
+            ]);
         });
 
         return redirect()
@@ -73,11 +82,20 @@ class CommentController extends Controller
         $this->authorize('delete', $comment);
 
         DB::transaction(function () use ($post, $comment) {
+
+            $lockedPost = Post::whereKey($post->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $comment->update([
                 'status' => 'deleted',
             ]);
 
-            $post->decrement('comment_count');
+            $lockedPost->update([
+                'comment_count' => $lockedPost->comments()
+                    ->where('status', 'visible')
+                    ->count(),
+            ]);
         });
 
         return redirect()
