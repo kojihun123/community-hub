@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('attachments:cleanup-temporary')->hourly();
+Schedule::command('attachments:cleanup-temporary')->everyMinute();
+Schedule::command('posts:select-popular')->everyMinute();

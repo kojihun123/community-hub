@@ -1,24 +1,20 @@
 @extends('layouts.app')
 
-@section('title', $board->name . ' 게시판')
+@section('title', '인기글 게시판')
 
 @section('content')
   <div class="space-y-3">
     <x-ui.section-card
-      :title="$board->name"
-      :action-url="auth()->check() ? route('posts.create', $board) : null"
-      action-variant="primary"
-      :action-label="auth()->check() ? '글쓰기' : null"
-      action-class=""
+      title="인기글"      
     >
-      @if (!empty($board->description))
-        <p class="text-sm text-zinc-500">{{ $board->description }}</p>
-      @endif
+ 
+      <p class="text-sm text-zinc-500">커뮤니티에서 인기글로 선정된 게시글 모음</p>
+   
     </x-ui.section-card>
 
     <section class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
       <div class="border-b border-stone-200 bg-stone-50/70 px-4 py-3">
-        <form method="get" action="{{ route('boards.show', $board) }}" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <form method="get" action="{{ route('popular') }}" class="flex flex-col gap-2 sm:flex-row sm:items-center">
           <select
             name="field"
             class="h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-500 sm:w-28"
@@ -42,7 +38,7 @@
             </x-ui.button>
 
             @if (filled(request('q')))
-              <x-ui.link-button :href="route('boards.show', $board)" variant="secondary" class="h-11 whitespace-nowrap">
+              <x-ui.link-button :href="route('popular')" variant="secondary" class="h-11 whitespace-nowrap">
                 초기화
               </x-ui.link-button>
             @endif
@@ -55,36 +51,35 @@
       </div>
 
       <ul class="divide-y divide-stone-100 md:hidden">
-        @forelse ($posts as $post)
+        @forelse ($popularItems as $popularItem)
           <li>
             <a
-              href="{{ route('posts.show', [$board, $post]) }}"
+              href="{{ route('posts.show', [$popularItem->post->board, $popularItem->post]) }}"
               class="block px-4 py-4 transition hover:bg-stone-50"
             >
               <div class="flex items-start justify-between gap-3">
                 <p class="min-w-0 flex-1 text-sm font-medium text-zinc-900">
-                  @if ($post->popular_entry_exists)
-                    <x-ui.badge>인기</x-ui.badge>
-                  @endif
-                  <span class="@if ($post->popular_entry_exists) ms-1 @endif">{{ $post->title }}</span>
+                  <span class="font-bold">[{{ $popularItem->post->board->name }}]</span>
+                  <x-ui.badge class="ms-1">인기</x-ui.badge>
+                  <span class="ms-1">{{ $popularItem->post->title }}</span>
                 </p>
                 <span class="shrink-0 text-xs font-semibold text-rose-500">
-                  {{ number_format($post->like_count) }}
+                  {{ number_format($popularItem->post->like_count) }}
                 </span>
               </div>
 
               <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
-                <span>ID {{ $post->id }}</span>
-                <span>{{ $post->author_name_snapshot }}</span>
-                <span>{{ $post->created_at->format('Y.m.d') }}</span>
-                <span>조회 {{ number_format($post->view_count) }}</span>
-                <span>추천 {{ number_format($post->like_count) }}</span>
+                <span>ID {{ $popularItem->post->id }}</span>
+                <span>{{ $popularItem->post->author_name_snapshot }}</span>
+                <span>{{ $popularItem->post->created_at->format('Y.m.d') }}</span>
+                <span>조회 {{ number_format($popularItem->post->view_count) }}</span>
+                <span>추천 {{ number_format($popularItem->post->like_count) }}</span>
               </div>
             </a>
           </li>
         @empty
           <li class="px-4 py-10 text-center text-sm text-zinc-500">
-            아직 등록된 게시글이 없습니다.
+            아직 선정된 인기글이 없습니다.
           </li>
         @endforelse
       </ul>
@@ -102,36 +97,35 @@
         </div>
 
         <ul class="divide-y divide-stone-100">
-          @forelse ($posts as $post)
+          @forelse ($popularItems as $popularItem)
             <li>
               <a
-                href="{{ route('posts.show', [$board, $post]) }}"
+                href="{{ route('posts.show', [$popularItem->post->board, $popularItem->post]) }}"
                 class="grid grid-cols-[4rem_minmax(0,1fr)_6rem_6rem_5rem_5rem] gap-3 px-6 py-3 text-sm text-zinc-700 transition hover:bg-stone-50"
               >
-                <span class="text-zinc-500">{{ $post->id }}</span>
+                <span class="text-zinc-500">{{ $popularItem->post->id }}</span>
                 <span class="flex min-w-0 items-center gap-2 font-medium text-zinc-900">
-                  @if ($post->popular_entry_exists)
-                    <x-ui.badge class="shrink-0">인기</x-ui.badge>
-                  @endif
-                  <span class="truncate">{{ $post->title }}</span>
+                  <span class="shrink-0 font-bold">[{{ $popularItem->post->board->name }}]</span>
+                  <x-ui.badge class="shrink-0">인기</x-ui.badge>
+                  <span class="truncate">{{ $popularItem->post->title }}</span>
                 </span>
-                <span class="truncate">{{ $post->author_name_snapshot }}</span>
-                <span class="text-zinc-500">{{ $post->created_at->format('m.d') }}</span>
-                <span class="text-right text-zinc-500">{{ number_format($post->view_count) }}</span>
-                <span class="text-right font-medium text-rose-500">{{ number_format($post->like_count) }}</span>
+                <span class="truncate">{{ $popularItem->post->author_name_snapshot }}</span>
+                <span class="text-zinc-500">{{ $popularItem->post->created_at->format('m.d') }}</span>
+                <span class="text-right text-zinc-500">{{ number_format($popularItem->post->view_count) }}</span>
+                <span class="text-right font-medium text-rose-500">{{ number_format($popularItem->post->like_count) }}</span>
               </a>
             </li>
           @empty
             <li class="px-4 py-10 text-center text-sm text-zinc-500">
-              아직 등록된 게시글이 없습니다.
+              아직 선정된 인기글이 없습니다.
             </li>
           @endforelse
         </ul>
       </div>
 
-      @if ($posts->hasPages())
+      @if ($popularItems->hasPages())
         <div class="border-t border-stone-200 px-6 py-4">
-          {{ $posts->links() }}
+          {{ $popularItems->links() }}
         </div>
       @endif
     

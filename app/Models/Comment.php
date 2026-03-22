@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,4 +42,23 @@ class Comment extends Model
         return $this->hasMany(Comment::class, 'parent_id');
     }
 
+    public function visibleChildren(): HasMany
+    {
+        return $this->children()->visible()->oldest();
+    }
+
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('status', 'visible');
+    }
+
+    public function scopeRoot(Builder $query): Builder
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function isVisible(): bool
+    {
+        return $this->status === 'visible';
+    }
 }

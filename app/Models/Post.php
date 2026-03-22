@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Post extends Model
@@ -48,13 +50,49 @@ class Post extends Model
         return $this->hasMany(Attachment::class);
     }
 
+    public function thumbnailAttachment(): HasOne
+    {
+        return $this->hasOne(Attachment::class)
+            ->where('type', 'image')
+            ->where('is_temporary', false)
+            ->oldestOfMany();
+    }
+
     public function comments() : HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
+    public function visibleComments(): HasMany
+    {
+        return $this->comments()->visible();
+    }
+
     public function likes(): HasMany
     {
         return $this->hasMany(PostLike::class);
+    }
+
+    public function popularEntry(): HasOne
+    {
+        return $this->hasOne(PopularPost::class);
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', 'published');
+    }
+
+    public function scopePublishedOnActiveBoards(Builder $query): Builder
+    {
+        return $query->published()
+            ->whereHas('board', function (Builder $query) {
+                $query->active();
+            });
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
     }
 }

@@ -11,7 +11,7 @@ class PostLikeController extends Controller
 {
     public function store(Board $board, Post $post)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $message = DB::transaction(function () use ($post) {
             $lockedPost = Post::whereKey($post->id)

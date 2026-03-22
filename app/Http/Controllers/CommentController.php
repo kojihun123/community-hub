@@ -12,7 +12,7 @@ class CommentController extends Controller
 {
     public function store(Board $board, Post $post, CommentRequest $request)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $data = $request->validated();
         $contentField = $request->commentField();
@@ -22,6 +22,7 @@ class CommentController extends Controller
         if ($parentId) {
             $parent = Comment::findOrFail($parentId);
             abort_if($parent->post_id !== $post->id, 404);
+            abort_if(! $parent->isVisible(), 404);
             abort_if($parent->parent_id !== null, 404);
         }
 
@@ -40,9 +41,7 @@ class CommentController extends Controller
             ]);
 
             $lockedPost->update([
-                'comment_count' => $lockedPost->comments()
-                    ->where('status', 'visible')
-                    ->count(),
+                'comment_count' => $lockedPost->visibleComments()->count(),
             ]);
         });
 
@@ -54,16 +53,16 @@ class CommentController extends Controller
     public function update(Board $board, Post $post, Comment $comment, CommentRequest $request)
     {
         abort_if(
-            !$board->is_active || $post->status !== 'published' || $comment->status !== 'visible',
+            ! $board->isEnabled() || ! $post->isPublished() || ! $comment->isVisible(),
             404
-        );        
+        );
         
         $this->authorize('update', $comment);
 
         $data = $request->validated();
         $contentField = $request->commentField();
 
-        $comment->update([               
+        $comment->update([
             'content' => $data[$contentField],
         ]);
 
@@ -75,7 +74,7 @@ class CommentController extends Controller
     public function destroy(Board $board, Post $post, Comment $comment)
     {
         abort_if(
-            !$board->is_active || $post->status !== 'published' || $comment->status !== 'visible',
+            ! $board->isEnabled() || ! $post->isPublished() || ! $comment->isVisible(),
             404
         );
 
@@ -92,15 +91,12 @@ class CommentController extends Controller
             ]);
 
             $lockedPost->update([
-                'comment_count' => $lockedPost->comments()
-                    ->where('status', 'visible')
-                    ->count(),
+                'comment_count' => $lockedPost->visibleComments()->count(),
             ]);
         });
 
         return redirect()
             ->route('posts.show', [$board, $post])
             ->with('success', '댓글이 삭제되었습니다.');
-    }    
-
+    }
 }

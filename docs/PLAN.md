@@ -124,6 +124,8 @@
 - 페이지네이션
 - 조회수
 - 인기글
+  - 단순 실시간 정렬이 아니라 `popular_posts` 선정 이력 구조를 함께 사용
+  - 홈 노출과 별도의 인기글 전용 페이지를 함께 운영
 
 ### 3. 댓글 기능
 
@@ -220,9 +222,17 @@
 메인 홈
 
 - 인기글
-- 최신글
 - 최근 방문 게시판
 - 운영 공지
+- 인기글 더보기
+
+#### `/popular`
+
+인기글 전용 페이지
+
+- `popular_posts` 선정 이력 기반 목록
+- 검색
+- 페이지네이션
 
 #### `/boards`
 
@@ -241,6 +251,7 @@
 - 검색
 - 정렬
 - 페이지네이션
+- 인기글 선정 글 배지 표시
 
 #### `/boards/{board:slug}/{post}`
 
@@ -415,6 +426,21 @@
 | updated_at | timestamp | 수정일 |
 
 같은 사용자가 같은 게시글에 중복으로 생성할 수 없도록 `user_id + post_id` unique 제약을 두고, 토글 방식으로 동작시킨다.
+
+### `popular_posts`
+
+인기글 선정 이력 테이블
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | bigint | PK |
+| post_id | bigint | `posts.id` FK, unique |
+| selected_at | timestamp | 인기글 선정 시각 |
+| created_at | timestamp | 생성일 |
+| updated_at | timestamp | 수정일 |
+
+- 인기글은 실시간 정렬 결과만으로 보여주지 않고, 일정 기준을 넘은 글을 따로 선정한다.
+- 선정 여부는 커맨드와 스케줄로 관리하고, 홈 화면은 이 선정 이력을 기준으로 노출한다.
 
 ### `reports`
 
@@ -605,6 +631,7 @@
 ## Cache / Performance Plan
 
 - 메인 홈 인기글 캐시
+- 인기글 선정 커맨드 / 스케줄
 - 상위분류 / 게시판 목록 캐시
 - 알림 개수 캐시
 - 게시글 목록 조회 시 eager loading 적용

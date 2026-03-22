@@ -14,24 +14,21 @@ class PostController extends Controller
 {
     public function show(Board $board, Post $post)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $post->load([
-            'user', 'board', 
+            'user', 'board',
             'comments' => function ($query) {
-                $query->where('status', 'visible')
-                    ->whereNull('parent_id')
+                $query->visible()
+                    ->root()
                     ->with([
                         'user',
-                        'children' => function ($query) {
-                            $query->where('status', 'visible')
-                                ->with('user')
-                                ->oldest();
-                    }
+                        'visibleChildren.user',
                     ])
                     ->oldest();
             },
-        ]);
+        ])
+        ->loadExists('popularEntry');
 
         if (auth()->check()) {
             $post->loadExists([
@@ -60,14 +57,14 @@ class PostController extends Controller
 
     public function create(Board $board)
     {
-        abort_if(!$board->is_active, 404);
+        abort_if(! $board->isEnabled(), 404);
 
         return view('posts.create', compact('board'));
     }
 
     public function store(Board $board, PostRequest $request)
     {
-        abort_if(!$board->is_active, 404);
+        abort_if(! $board->isEnabled(), 404);
 
         $data = $request->validated();
 
@@ -95,7 +92,7 @@ class PostController extends Controller
 
     public function edit(Board $board, Post $post)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $this->authorize('update', $post);
 
@@ -106,7 +103,7 @@ class PostController extends Controller
 
     public function update(Board $board, Post $post, PostRequest $request)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $this->authorize('update', $post);
 
@@ -132,12 +129,12 @@ class PostController extends Controller
 
     public function destroy(Board $board, Post $post)
     {
-        abort_if(!$board->is_active || $post->status !== 'published', 404);
+        abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
         $this->authorize('delete', $post);
 
         $post->update([
-            'status' => 'deleted'
+            'status' => 'deleted',
         ]);
 
         return redirect()
@@ -185,8 +182,8 @@ class PostController extends Controller
                 'is_temporary' => true,
             ]);
 
-        Attachment::where('user_id', auth()->id())
-            ->where('is_temporary', true)
+        Attachment::temporary()
+            ->where('user_id', auth()->id())
             ->whereIn('path', $paths)
             ->update([
                 'post_id' => $post->id,

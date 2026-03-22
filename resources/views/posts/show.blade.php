@@ -15,9 +15,16 @@
       @endif
     </x-ui.section-card>
 
-    <x-ui.section-card
-      :title="$post->title"
-    >
+    <x-ui.section-card :title="$post->title">
+      <x-slot:heading>
+        <div class="flex min-w-0 items-center gap-2">
+          @if ($post->popular_entry_exists)
+            <x-ui.badge class="shrink-0">인기</x-ui.badge>
+          @endif
+          <h2 class="truncate text-base font-semibold text-zinc-900">{{ $post->title }}</h2>
+        </div>
+      </x-slot:heading>
+
       <div class="space-y-4">
         <div class="flex flex-col gap-3 border-b border-stone-200 pb-3 md:flex-row md:items-center md:justify-between">
           <div class="min-w-0">
@@ -29,9 +36,9 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
-            <span class="rounded-full bg-stone-100 px-2.5 py-1">조회 {{ number_format($post->view_count) }}</span>
-            <span class="rounded-full bg-rose-50 px-2.5 py-1 text-rose-600">추천 {{ number_format($post->like_count) }}</span>
-            <span class="rounded-full bg-stone-100 px-2.5 py-1">댓글 {{ number_format($post->comment_count) }}</span>
+            <x-ui.badge>조회 {{ number_format($post->view_count) }}</x-ui.badge>
+            <x-ui.badge>추천 {{ number_format($post->like_count) }}</x-ui.badge>
+            <x-ui.badge>댓글 {{ number_format($post->comment_count) }}</x-ui.badge>
           </div>
         </div>
 

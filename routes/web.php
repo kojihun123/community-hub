@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PopularPostController;
 use App\Http\Controllers\PostAttachmentUploadController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -48,6 +48,8 @@ Route::scopeBindings()->group(function () {
         ->name('posts.likes.store');
             
     });
+
+    Route::get('/popular', [PopularPostController::class, 'index'])->name('popular');
 
     Route::get('/boards/{board:slug}/{post}', [PostController::class, 'show'])->name('posts.show');
 });

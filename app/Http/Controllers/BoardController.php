@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 class BoardController extends Controller
 {
     public function index() {
-        $board_groups = BoardGroup::where('is_active', true)
+        $board_groups = BoardGroup::active()
             ->with(['boards' => function ($query) {
-                $query->where('is_active', true)
+                $query->active()
                     ->orderBy('sort_order');
             }])
             ->orderBy('sort_order')
@@ -22,7 +22,7 @@ class BoardController extends Controller
 
     public function show(Board $board, Request $request)
     {
-        abort_if(! $board->is_active, 404);
+        abort_if(! $board->isEnabled(), 404);
 
         $keyword = trim((string) $request->input('q'));
         $field = $request->input('field', 'title');
@@ -34,7 +34,8 @@ class BoardController extends Controller
         }
 
         $posts = $board->posts()
-            ->where('status', 'published')
+            ->published()
+            ->withExists(['popularEntry'])
             ->when($keyword !== '', function ($query) use ($field, $keyword) {
                 if ($field === 'id' && ctype_digit($keyword)) {
                     $query->whereKey((int) $keyword);

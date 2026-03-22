@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -33,5 +34,20 @@ class Attachment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeTemporary(Builder $query): Builder
+    {
+        return $query->where('is_temporary', true);
+    }
+
+    public function scopeAttached(Builder $query): Builder
+    {
+        return $query->whereNotNull('post_id');
+    }
+
+    public function scopeUnusedTemporary(Builder $query): Builder
+    {
+        return $query->temporary()->whereNull('post_id');
     }
 }
