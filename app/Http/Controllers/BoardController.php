@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use App\Models\BoardGroup;
+use App\Services\RecentBoardService;
 use Illuminate\Http\Request;
 
 class BoardController extends Controller
@@ -20,9 +21,11 @@ class BoardController extends Controller
         return view('boards.index', compact('board_groups'));
     }
 
-    public function show(Board $board, Request $request)
+    public function show(Board $board, Request $request, RecentBoardService $recentBoardService)
     {
         abort_if(! $board->isEnabled(), 404);
+        
+        $recentBoardService->push($board);
 
         $keyword = trim((string) $request->input('q'));
         $field = $request->input('field', 'title');

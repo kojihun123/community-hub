@@ -137,7 +137,7 @@
 ### 4. 상호작용 기능
 
 - 게시글 좋아요
-- 신고
+- 게시글 신고
 - 알림
 - 실시간 알림
 
@@ -197,7 +197,7 @@
 - 게시글 작성 / 수정 / 삭제
 - 댓글 / 대댓글 작성
 - 좋아요
-- 신고
+- 게시글 신고
 - 프로필 관리
 
 ### `moderator`
@@ -226,6 +226,9 @@
 - 운영 공지
 - 인기글 더보기
 
+홈은 단순 랜딩 페이지가 아니라, 사용자가 다시 들어왔을 때
+`지금 볼 만한 인기글`, `최근 방문한 게시판`, `운영 공지`를 빠르게 확인할 수 있는 요약 화면으로 설계한다.
+
 #### `/popular`
 
 인기글 전용 페이지
@@ -252,6 +255,7 @@
 - 정렬
 - 페이지네이션
 - 인기글 선정 글 배지 표시
+- 공지사항 게시판은 일반 사용자 글쓰기 제한
 
 #### `/boards/{board:slug}/{post}`
 
@@ -261,7 +265,8 @@
 - 조회수
 - 좋아요
 - 댓글 / 대댓글
-- 신고 버튼
+- 게시글 신고 버튼
+- 공지사항 게시글은 댓글 비활성화
 
 #### `/boards/{board:slug}/create`
 
@@ -341,9 +346,10 @@
 | --- | --- | --- |
 | id | bigint | PK |
 | name | string | 사용자 이름 |
-| username | string | 고유 사용자명 |
 | email | string | 고유 이메일 |
+| email_verified_at | timestamp nullable | 이메일 인증 시각 |
 | password | string | 비밀번호 |
+| remember_token | string nullable | 자동 로그인 토큰 |
 | bio | text nullable | 자기소개 |
 | avatar | string nullable | 프로필 이미지 |
 | role | enum | `user`, `moderator`, `admin` |
@@ -448,14 +454,16 @@
 | --- | --- | --- |
 | id | bigint | PK |
 | reporter_id | bigint | `users.id` FK |
-| reportable_type | string | polymorphic type |
-| reportable_id | bigint | polymorphic id |
+| reportable_type | string | polymorphic type, 현재는 `Post`만 사용 |
+| reportable_id | bigint | polymorphic id, 현재는 게시글 id |
 | reason | text | 신고 사유 |
 | status | enum | `pending`, `resolved`, `rejected` |
 | handled_by | bigint nullable | `users.id` FK |
-| moderation_action_id | bigint nullable | 대표 운영 조치 연결 |
 | created_at | timestamp | 생성일 |
 | updated_at | timestamp | 수정일 |
+
+- 현재 1차 구현 범위는 `게시글 신고`만 포함한다.
+- `reportable` 구조는 이후 댓글 / 사용자 신고 확장을 위해 유지한다.
 
 ### `user_sanctions`
 
@@ -465,13 +473,14 @@
 | --- | --- | --- |
 | id | bigint | PK |
 | user_id | bigint | `users.id` FK |
+| moderator_id | bigint | 제재를 수행한 운영자 |
 | report_id | bigint nullable | `reports.id` FK |
+| moderation_action_id | bigint nullable | `moderation_actions.id` FK |
 | type | enum | `warning`, `suspension`, `ban` |
 | reason | text | 제재 사유 |
-| started_at | timestamp | 제재 시작 시각 |
-| ended_at | timestamp nullable | 기간 정지 종료 시각 |
+| starts_at | timestamp nullable | 제재 시작 시각 |
+| ends_at | timestamp nullable | 기간 정지 종료 시각 |
 | status | enum | `active`, `expired`, `revoked` |
-| handled_by | bigint | 운영 처리자 |
 | created_at | timestamp | 생성일 |
 | updated_at | timestamp | 수정일 |
 
@@ -482,12 +491,12 @@
 | Column | Type | Notes |
 | --- | --- | --- |
 | id | bigint | PK |
+| moderator_id | bigint | 운영 처리자 |
 | report_id | bigint nullable | `reports.id` FK |
-| target_type | string | `post`, `comment`, `user` |
-| target_id | bigint | 대상 ID |
+| actionable_type | string | polymorphic type |
+| actionable_id | bigint | polymorphic id |
 | action | enum | `hide`, `delete`, `restore`, `warn`, `suspend`, `ban` |
-| reason | text | 처리 사유 |
-| handled_by | bigint | 운영 처리자 |
+| reason | text nullable | 처리 사유 |
 | created_at | timestamp | 생성일 |
 | updated_at | timestamp | 수정일 |
 
@@ -576,7 +585,6 @@
 - 신고 기반 처리였다면 `moderation_actions.report_id`로 연결
 - 사용자 제재까지 이어지면 `user_sanctions` 생성
 - 신고 기반 제재였다면 `user_sanctions.report_id`로 연결
-- `reports.moderation_action_id`에는 대표 조치 1건을 연결할 수 있다.
 
 예시 제재 흐름은 다음과 같다.
 

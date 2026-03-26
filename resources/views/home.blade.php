@@ -14,8 +14,12 @@
     </div>
 
     <div class="space-y-3">
-      @include ('partials.home.recent-boards')
-      @include ('partials.home.notices')
+      @include ('partials.home.recent-boards', [
+        'recentBoards' => $recentBoards,
+      ])
+      @include ('partials.home.notices', [
+        'noticePosts' => $noticePosts,
+      ])
     </div>
   </div>
 @endsection

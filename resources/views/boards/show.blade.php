@@ -4,11 +4,15 @@
 
 @section('content')
   <div class="space-y-3">
+    @php
+      $canCreatePost = auth()->user()?->can('create', [App\Models\Post::class, $board]) ?? false;
+    @endphp
+
     <x-ui.section-card
       :title="$board->name"
-      :action-url="auth()->check() ? route('posts.create', $board) : null"
+      :action-url="$canCreatePost ? route('posts.create', $board) : null"
       action-variant="primary"
-      :action-label="auth()->check() ? '글쓰기' : null"
+      :action-label="$canCreatePost ? '글쓰기' : null"
       action-class=""
     >
       @if (!empty($board->description))

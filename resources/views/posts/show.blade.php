@@ -3,12 +3,16 @@
 @section ('title', '게시글 보기')
 
 @section ('content')
+  @php
+    $canCreatePost = auth()->user()?->can('create', [App\Models\Post::class, $post->board]) ?? false;
+  @endphp
+
   <div class="space-y-3">
     <x-ui.section-card 
       :title="$post->board->name"
-      :action-url="auth()->check() ? route('posts.create', $post->board) : null"
+      :action-url="$canCreatePost ? route('posts.create', $post->board) : null"
       action-variant="primary"
-      :action-label="auth()->check() ? '글쓰기' : null"
+      :action-label="$canCreatePost ? '글쓰기' : null"
       action-class="">
       @if (!empty($post->board->description))
         <p class="text-sm text-zinc-500">{{ $post->board->description }}</p>
@@ -56,13 +60,116 @@
 
           <div class="flex flex-wrap items-center gap-2">
             @auth
+              @php
+                $canReportPost = ! $post->board->isNoticeBoard() && $post->user_id !== auth()->id();
+              @endphp
 
               <form method="post" action="{{ route('posts.likes.store', [$post->board, $post]) }}">
                 @csrf
-                <x-ui.button type="submit" variant="{{ $post->is_liked_by_user ? 'danger' : 'success' }}">
+                <x-ui.button
+                  type="submit"
+                  variant="{{ $post->is_liked_by_user ? 'like' : 'outline' }}"
+                  class="min-w-[7rem]"
+                >
                   좋아요 {{ number_format($post->like_count) }}
                 </x-ui.button>
-              </form>            
+              </form>
+
+              @if ($canReportPost)
+                @if ($post->is_reported_by_user)
+                  <x-ui.button
+                    type="button"
+                    variant="outline"
+                    class="cursor-not-allowed opacity-60"
+                    disabled
+                  >
+                    신고 완료
+                  </x-ui.button>
+                @else
+                  <div x-data="{ open: false, reportReason: '', customReason: '' }" class="relative">
+                    <form
+                      x-ref="reportForm"
+                      method="post"
+                      action="{{ route('posts.reports.store', [$post->board, $post]) }}"
+                      onsubmit="return confirm('이 게시글을 신고하시겠습니까?')"
+                    >
+                      @csrf
+
+                      <input type="hidden" name="reason" x-model="reportReason">
+
+                      <x-ui.button
+                        type="button"
+                        variant="outline"
+                        @click="open = !open"
+                      >
+                        신고
+                      </x-ui.button>
+
+                      <div
+                        x-show="open"
+                        x-cloak
+                        @click.outside="open = false"
+                        class="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-stone-200 bg-white p-2 shadow-lg"
+                      >
+                        <button
+                          type="button"
+                          class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
+                          @click="reportReason = 'abuse'; $nextTick(() => $refs.reportForm.requestSubmit())"
+                        >
+                          욕설/비방
+                        </button>
+
+                        <button
+                          type="button"
+                          class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
+                          @click="reportReason = 'advertising'; $nextTick(() => $refs.reportForm.requestSubmit())"
+                        >
+                          광고/홍보
+                        </button>
+
+                        <button
+                          type="button"
+                          class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
+                          @click="reportReason = 'spam'; $nextTick(() => $refs.reportForm.requestSubmit())"
+                        >
+                          도배/스팸
+                        </button>
+
+                        <button
+                          type="button"
+                          class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
+                          @click="reportReason = 'adult'; $nextTick(() => $refs.reportForm.requestSubmit())"
+                        >
+                          성인/음란성 콘텐츠
+                        </button>
+
+                        <button
+                          type="button"
+                          class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
+                          @click="reportReason = 'other'; customReason = ''"
+                        >
+                          기타
+                        </button>
+
+                        <div x-show="reportReason === 'other'" x-cloak class="mt-2 space-y-2 border-t border-stone-200 pt-2">
+                          <textarea
+                            name="custom_reason"
+                            x-model="customReason"
+                            :required="reportReason === 'other'"
+                            rows="3"
+                            class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                            placeholder="신고 사유를 입력해주세요."
+                          ></textarea>
+
+                          <x-ui.button type="submit" class="w-full">
+                            신고 접수
+                          </x-ui.button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                @endif
+              @endif
             
               @can('update', $post)     
                 <x-ui.link-button
@@ -93,6 +200,7 @@
       </div>
     </x-ui.section-card>
 
+    @if (! $post->board->isNoticeBoard())
     <x-ui.section-card :title="'전체 댓글 ' . number_format($post->comment_count) . '개'">
       <div class="space-y-3">
         <ul class="space-y-2">
@@ -367,6 +475,7 @@
         @endauth
       </div>
     </x-ui.section-card>
+    @endif
 
   </div>
 @endsection

@@ -4,38 +4,26 @@
   action-label="더보기"
 >
   <ul class="divide-y divide-stone-100">
-      <li class="py-3 first:pt-0 last:pb-0">
-        <a href="#" class="block">
+
+    @forelse ($noticePosts as $noticePost)
+
+    <li class="py-3 first:pt-0 last:pb-0">
+        <a href="{{ route('posts.show', [$noticePost->board, $noticePost]) }}" class="block">
           <div class="flex items-start gap-2">
           <x-ui.badge class="mt-0.5 shrink-0">공지</x-ui.badge>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium text-zinc-900">커뮤니티 운영 기준 안내</p>
-            <p class="mt-1 text-xs text-zinc-500">2026-03-16</p>
+            <p class="truncate text-sm font-medium text-zinc-900">{{ $noticePost->title }}</p>
+            <p class="mt-1 text-xs text-zinc-500">{{ $noticePost->created_at->diffforHumans() }}</p>
           </div>
         </div>
       </a>
-    </li>
-      <li class="py-3 last:pb-0">
-        <a href="#" class="block">
-          <div class="flex items-start gap-2">
-          <x-ui.badge class="mt-0.5 shrink-0">공지</x-ui.badge>
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium text-zinc-900">신고 처리 정책 변경 예정</p>
-            <p class="mt-1 text-xs text-zinc-500">2026-03-15</p>
-          </div>
-        </div>
-      </a>
-    </li>
-      <li class="py-3 last:pb-0">
-        <a href="#" class="block">
-          <div class="flex items-start gap-2">
-          <x-ui.badge class="mt-0.5 shrink-0">공지</x-ui.badge>
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium text-zinc-900">새 게시판 구조 시범 적용 안내</p>
-            <p class="mt-1 text-xs text-zinc-500">2026-03-14</p>
-          </div>
-        </div>
-      </a>
-    </li>
+    </li>    
+      
+    @empty
+      <li class="py-6 text-center text-sm text-zinc-500">
+        아직 등록된 운영 공지가 없습니다.
+      </li>
+    @endforelse    
+
   </ul>
 </x-ui.section-card>

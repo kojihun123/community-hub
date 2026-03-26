@@ -27,9 +27,7 @@ class PostSeeder extends Seeder
             return;
         }
 
-        $boards = Board::query()
-            ->where('slug', '!=', 'notice')
-            ->where('is_active', true)
+        $boards = Board::active()
             ->get()
             ->keyBy('slug');
 
@@ -47,6 +45,51 @@ class PostSeeder extends Seeder
         ];
 
         $posts = [
+            [
+                'board_slug' => 'notice',
+                'user_index' => 0,
+                'title' => '커뮤니티 이용 수칙 및 운영 기준 안내',
+                'content' => '<p>커뮤니티를 이용하기 전에 기본 운영 기준을 꼭 확인해주세요.</p><p>타인 비방, 도배, 광고성 게시물은 운영 정책에 따라 처리됩니다.</p>',
+                'created_at' => now()->subDays(2),
+                'view_count' => 520,
+                'likes' => 4,
+                'is_notice' => true,
+                'is_pinned' => true,
+                'comments' => [],
+            ],
+            [
+                'board_slug' => 'notice',
+                'user_index' => 0,
+                'title' => '인기글 선정 기준이 새롭게 적용되었습니다',
+                'content' => '<p>홈과 인기글 페이지에 노출되는 인기글은 별도 선정 이력 기준으로 운영됩니다.</p><p>선정 기준은 내부 점수 정책에 따라 주기적으로 반영됩니다.</p>',
+                'created_at' => now()->subDay(),
+                'view_count' => 410,
+                'likes' => 3,
+                'is_notice' => true,
+                'comments' => [],
+            ],
+            [
+                'board_slug' => 'notice',
+                'user_index' => 0,
+                'title' => '신고 처리 정책과 운영 대응 절차 안내',
+                'content' => '<p>신고된 게시글과 댓글은 운영 기준에 따라 순차적으로 검토됩니다.</p><p>처리 결과는 정책 위반 여부와 운영 사유를 기준으로 반영됩니다.</p>',
+                'created_at' => now()->subHours(18),
+                'view_count' => 280,
+                'likes' => 2,
+                'is_notice' => true,
+                'comments' => [],
+            ],
+            [
+                'board_slug' => 'notice',
+                'user_index' => 0,
+                'title' => '서비스 개편에 따른 게시판 구조 변경 예정',
+                'content' => '<p>일부 게시판 분류와 홈 화면 구성이 순차적으로 조정될 예정입니다.</p><p>변경 내용은 공지사항을 통해 계속 안내드리겠습니다.</p>',
+                'created_at' => now()->subHours(8),
+                'view_count' => 190,
+                'likes' => 1,
+                'is_notice' => true,
+                'comments' => [],
+            ],
             [
                 'board_slug' => 'humor',
                 'user_index' => 0,
@@ -412,8 +455,8 @@ class PostSeeder extends Seeder
                     'content' => $postData['content'],
                     'author_name_snapshot' => $user?->name ?? '익명',
                     'status' => 'published',
-                    'is_notice' => false,
-                    'is_pinned' => false,
+                    'is_notice' => $postData['is_notice'] ?? false,
+                    'is_pinned' => $postData['is_pinned'] ?? false,
                     'view_count' => $postData['view_count'],
                     'like_count' => 0,
                     'comment_count' => 0,

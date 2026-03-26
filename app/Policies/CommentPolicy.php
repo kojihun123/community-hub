@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Comment;
+use App\Models\Post;
 use App\Models\User;
 
 class CommentPolicy
@@ -17,9 +18,9 @@ class CommentPolicy
         return true;
     }
 
-    public function create(User $user): bool
+    public function create(User $user, Post $post): bool
     {
-        return true;
+        return ! $post->board->isNoticeBoard();
     }
 
     public function update(User $user, Comment $comment): bool

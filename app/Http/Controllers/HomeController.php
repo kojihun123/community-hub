@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\PopularPost;
+use App\Models\Post;
+use App\Services\RecentBoardService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(RecentBoardService $recentBoardService)
     {
         $popularItems = Cache::remember('home:popular_posts', now()->addMinute(), function () {
             return PopularPost::available()
@@ -37,6 +39,17 @@ class HomeController extends Controller
                 ->all();
         });
 
-        return view('home', compact('popularItems'));
+        $recentBoards = $recentBoardService->all();
+
+        $noticePosts = Post::publishedOnActiveBoards()->where('is_notice', true)
+            ->whereHas('board', function  ($query) {
+                $query->where('slug', 'notice');
+            })
+            ->with('board:id,name,slug')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('home', compact('popularItems', 'recentBoards', 'noticePosts'));
     }
 }

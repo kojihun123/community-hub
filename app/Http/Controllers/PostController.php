@@ -6,15 +6,18 @@ use App\Http\Requests\PostRequest;
 use App\Models\Attachment;
 use App\Models\Board;
 use App\Models\Post;
+use App\Services\RecentBoardService;
 use DOMDocument;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
-    public function show(Board $board, Post $post)
+    public function show(Board $board, Post $post, RecentBoardService $recentBoardService)
     {
         abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
+
+        $recentBoardService->push($board);
 
         $post->load([
             'user', 'board',
@@ -35,9 +38,13 @@ class PostController extends Controller
                 'likes as is_liked_by_user' => function ($query) {
                     $query->where('user_id', auth()->id());
                 },
+                'reports as is_reported_by_user' => function ($query) {
+                    $query->where('reporter_id', auth()->id());
+                },
             ]);
         } else {
             $post->setAttribute('is_liked_by_user', false);
+            $post->setAttribute('is_reported_by_user', false);
         }
 
         $viewerKey = 'viewer:' . md5(request()->ip() . '|' . request()->userAgent());
@@ -59,12 +66,16 @@ class PostController extends Controller
     {
         abort_if(! $board->isEnabled(), 404);
 
+        $this->authorize('create', [Post::class, $board]);
+
         return view('posts.create', compact('board'));
     }
 
     public function store(Board $board, PostRequest $request)
     {
         abort_if(! $board->isEnabled(), 404);
+
+        $this->authorize('create', [Post::class, $board]);
 
         $data = $request->validated();
 

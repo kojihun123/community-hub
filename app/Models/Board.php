@@ -44,4 +44,9 @@ class Board extends Model
     {
         return $this->is_active;
     }
+
+    public function isNoticeBoard(): bool
+    {
+        return $this->slug === 'notice';
+    }
 }

@@ -14,6 +14,8 @@ class CommentController extends Controller
     {
         abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
+        $this->authorize('create', [Comment::class, $post]);
+
         $data = $request->validated();
         $contentField = $request->commentField();
         $parentId = $request->input('parent_id');

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Board;
 use App\Models\Post;
 use App\Models\User;
 
@@ -17,8 +18,11 @@ class PostPolicy
         return true;
     }
 
-    public function create(User $user): bool
+    public function create(User $user, Board $board): bool
     {
+        if ($board->slug == 'notice')
+            return $user->role == 'admin';
+        
         return true;
     }
 

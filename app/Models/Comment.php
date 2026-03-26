@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Comment extends Model
 {
@@ -45,6 +46,16 @@ class Comment extends Model
     public function visibleChildren(): HasMany
     {
         return $this->children()->visible()->oldest();
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function moderationHistory(): MorphMany
+    {
+        return $this->morphMany(ModerationAction::class, 'actionable');
     }
 
     public function scopeVisible(Builder $query): Builder
