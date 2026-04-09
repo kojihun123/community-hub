@@ -182,4 +182,25 @@ class User extends Authenticatable
     {
         return $this->status === 'withdrawn';
     }
+
+    public function roleLabel(): string
+    {
+        return match ($this->role) {
+            'admin' => '관리자',
+            'moderator' => '운영진',
+            default => '일반 회원',
+        };
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'active' => '정상',
+            'suspended' => '정지',
+            'banned' => '차단',
+            'withdrawn' => '탈퇴',
+            default => '알 수 없음',
+        };
+    }
+
 }

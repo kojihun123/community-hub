@@ -4,6 +4,8 @@ use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MyPageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PopularPostController;
 use App\Http\Controllers\PostAttachmentUploadController;
 use App\Http\Controllers\PostController;
@@ -31,6 +33,8 @@ Route::get('/boards/{board:slug}', [BoardController::class, 'show'])->name('boar
 
 Route::scopeBindings()->group(function () {
     Route::middleware('auth')->group(function () {
+
+        //게시글 관련
         Route::get('/boards/{board:slug}/create', [PostController::class, 'create'])->name('posts.create');
         Route::post('/boards/{board:slug}', [PostController::class, 'store'])->name('posts.store');
         Route::get('/boards/{board:slug}/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
@@ -58,7 +62,18 @@ Route::scopeBindings()->group(function () {
         //신고
         Route::post('/boards/{board:slug}/{post}/reports', [ReportController::class, 'store'])
         ->name('posts.reports.store');
-            
+
+        //알림
+        Route::get('/mypage/notifications', [NotificationController::class, 'index'])
+        ->name('mypage.notifications.index');
+        Route::patch('/mypage/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('mypage.notifications.read-all');
+
+        //마이페이지
+        Route::get('/mypage', [MyPageController::class, 'index'])
+        ->name('mypage.index');
+        Route::get('/mypage/profile/edit', [MyPageController::class, 'editProfile'])->name('mypage.profile.edit');
+        Route::patch('/mypage/profile', [MyPageController::class, 'updateProfile'])->name('mypage.profile.update');
     });
 
     Route::get('/popular', [PopularPostController::class, 'index'])->name('popular');

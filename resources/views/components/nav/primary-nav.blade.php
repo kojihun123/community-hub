@@ -84,7 +84,7 @@
         <div class="flex flex-col gap-2 text-sm">
           @auth
             <a
-              href="{{ url('/notifications') }}"
+              href="{{ route('mypage.notifications.index') }}"
               class="rounded-xl px-3 py-2 text-white/90 transition hover:bg-white/10"
               >알림</a
             >

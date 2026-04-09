@@ -70,4 +70,18 @@ class Notification extends Model
             'read_at' => null,
         ])->save();
     }
+
+    public function typeLabel(): string
+    {
+        return match ($this->type) {
+            'report_resolved' => '신고 처리',
+            'report_rejected' => '신고 반려',
+            'post_moderated' => '게시글 조치',
+            'user_sanction_applied' => '계정 제재',
+            'comment' => '댓글',
+            'reply' => '답글',
+            default => '일반 알림',
+        };
+    }
+
 }

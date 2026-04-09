@@ -16,16 +16,20 @@
     <div class="flex items-center gap-3">
       @auth
         <a
-          href="{{ url('/notifications') }}"
-          class="transition hover:text-zinc-900"
-          >알림</a
+          href="{{ route('mypage.notifications.index') }}"
+          class="inline-flex items-center gap-1 transition hover:text-zinc-900"
         >
-        <a href="{{ url('/profile') }}" class="transition hover:text-zinc-900"
-          >프로필</a
+          알림
+          @if ($unreadNotificationCount > 0)
+            <x-ui.badge>{{ $unreadNotificationCount }}</x-ui.badge>
+          @endif
+        </a>
+        <a href="{{ url('/mypage') }}" class="transition hover:text-zinc-900"
+          >마이페이지</a
         >
         @if (in_array(optional(auth()->user())->role, ['admin', 'moderator'], true))
-          <a href="{{ url('/admin') }}" class="font-medium text-zinc-900"
-            >관리자</a
+          <a href="{{ url('/admin') }}" class="font-medium text-red-600 font-extrabold"
+            >관리자메뉴</a
           >
         @endif
         <form method="POST" action="{{ url('/logout') }}">

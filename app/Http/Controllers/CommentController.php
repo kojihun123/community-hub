@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentRequest;
 use App\Models\Board;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,27 @@ class CommentController extends Controller
             $lockedPost->update([
                 'comment_count' => $lockedPost->visibleComments()->count(),
             ]);
+
+            if (! $parent && $post->user_id !== auth()->id()) {
+                Notification::create([
+                    'user_id' => $post->user_id,
+                    'type' => 'comment',
+                    'title' => '댓글이 달렸습니다.',
+                    'message' => $data[$contentField],
+                    'link' => route('posts.show', [$post->board, $post]),
+                ]);
+            }
+
+            if ($parent && $parent->user_id !== auth()->id()) {
+                Notification::create([
+                    'user_id' => $parent->user_id,
+                    'type' => 'reply',
+                    'title' => '답글이 달렸습니다.',
+                    'message' => $data[$contentField],
+                    'link' => route('posts.show', [$post->board, $post]),
+                ]);
+            }
+
         });
 
         return redirect()

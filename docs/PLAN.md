@@ -507,7 +507,9 @@
 | id | bigint | PK |
 | user_id | bigint | 수신 사용자 |
 | type | string | 알림 타입 |
-| data | json | 알림 payload |
+| title | string | 알림 제목 |
+| message | text nullable | 알림 본문 |
+| link | string nullable | 이동 링크 |
 | read_at | timestamp nullable | 읽음 시각 |
 | created_at | timestamp | 생성일 |
 | updated_at | timestamp | 수정일 |
@@ -585,6 +587,7 @@
 - 신고 기반 처리였다면 `moderation_actions.report_id`로 연결
 - 사용자 제재까지 이어지면 `user_sanctions` 생성
 - 신고 기반 제재였다면 `user_sanctions.report_id`로 연결
+- 신고 처리 / 반려 / 게시글 숨김 / 삭제 / 사용자 제재 시 `notifications` 생성
 
 예시 제재 흐름은 다음과 같다.
 
