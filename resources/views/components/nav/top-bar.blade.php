@@ -13,7 +13,7 @@
       >
       @if (in_array(optional(auth()->user())->role, ['admin', 'moderator'], true))
         <a href="{{ url('/admin') }}" class="font-medium text-red-600 font-extrabold"
-          >관리자메뉴</a
+          >신고관리</a
         >
       @endif      
     </div>

@@ -1,40 +1,40 @@
 @php
   $sections = [
-      [
-          'label' => '대시보드',
-          'href' => url('/admin'),
-          'active' => request()->is('admin'),
-      ],
+      // [
+      //     'label' => '대시보드',
+      //     'href' => url('/admin'),
+      //     'active' => request()->is('admin'),
+      // ],
       [
           'label' => '신고 관리',
           'href' => url('/admin/reports'),
           'active' => request()->is('admin/reports*'),
       ],
-      [
-          'label' => '게시글 관리',
-          'href' => url('/admin/posts'),
-          'active' => request()->is('admin/posts*'),
-      ],
-      [
-          'label' => '댓글 관리',
-          'href' => url('/admin/comments'),
-          'active' => request()->is('admin/comments*'),
-      ],
-      [
-          'label' => '공지 관리',
-          'href' => url('/admin/notices'),
-          'active' => request()->is('admin/notices*'),
-      ],
-      [
-          'label' => '회원 관리',
-          'href' => url('/admin/users'),
-          'active' => request()->is('admin/users*'),
-      ],
-      [
-          'label' => '게시판 관리',
-          'href' => url('/admin/boards'),
-          'active' => request()->is('admin/boards*') || request()->is('admin/board-groups*'),
-      ],
+      // [
+      //     'label' => '게시글 관리',
+      //     'href' => url('/admin/posts'),
+      //     'active' => request()->is('admin/posts*'),
+      // ],
+      // [
+      //     'label' => '댓글 관리',
+      //     'href' => url('/admin/comments'),
+      //     'active' => request()->is('admin/comments*'),
+      // ],
+      // [
+      //     'label' => '공지 관리',
+      //     'href' => url('/admin/notices'),
+      //     'active' => request()->is('admin/notices*'),
+      // ],
+      // [
+      //     'label' => '회원 관리',
+      //     'href' => url('/admin/users'),
+      //     'active' => request()->is('admin/users*'),
+      // ],
+      // [
+      //     'label' => '게시판 관리',
+      //     'href' => url('/admin/boards'),
+      //     'active' => request()->is('admin/boards*') || request()->is('admin/board-groups*'),
+      // ],
   ];
 @endphp
 

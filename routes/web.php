@@ -26,6 +26,9 @@ Route::post('/presence/home/heartbeat', [HomeController::class, 'heartbeat'])
 // });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('admin.reports.index');
+    });
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::patch('/reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
 });
