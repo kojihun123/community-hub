@@ -72,4 +72,27 @@ class Comment extends Model
     {
         return $this->status === 'visible';
     }
+
+    public function isReply(): bool
+    {
+        return $this->parent_id !== null;
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'hidden' => '숨김',
+            'deleted' => '삭제됨',
+            default => '게시됨',
+        };
+    }
+
+    public function statusBadgeVariant(): string
+    {
+        return match ($this->status) {
+            'hidden' => 'outline',
+            'deleted' => 'danger',
+            default => 'success',
+        };
+    }
 }

@@ -106,4 +106,22 @@ class Post extends Model
     {
         return $this->status === 'published';
     }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'hidden' => '숨김',
+            'deleted' => '삭제됨',
+            default => '게시됨',
+        };
+    }
+
+    public function statusBadgeVariant(): string
+    {
+        return match ($this->status) {
+            'hidden' => 'outline',
+            'deleted' => 'danger',
+            default => 'success',
+        };
+    }
 }

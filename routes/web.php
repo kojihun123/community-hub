@@ -15,6 +15,9 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('/presence/home/heartbeat', [HomeController::class, 'heartbeat'])
+    ->middleware('throttle:60,1')
+    ->name('home.presence.heartbeat');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -74,6 +77,9 @@ Route::scopeBindings()->group(function () {
         ->name('mypage.index');
         Route::get('/mypage/profile/edit', [MyPageController::class, 'editProfile'])->name('mypage.profile.edit');
         Route::patch('/mypage/profile', [MyPageController::class, 'updateProfile'])->name('mypage.profile.update');
+        Route::get('/mypage/posts', [MyPageController::class, 'myPosts'])->name('mypage.posts');
+        Route::get('/mypage/comments', [MyPageController::class, 'myComments'])->name('mypage.comments');
+
     });
 
     Route::get('/popular', [PopularPostController::class, 'index'])->name('popular');

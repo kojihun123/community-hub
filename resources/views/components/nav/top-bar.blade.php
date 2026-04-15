@@ -11,6 +11,11 @@
       <a href="{{ url('/popular') }}" class="transition hover:text-zinc-900"
         >인기글</a
       >
+      @if (in_array(optional(auth()->user())->role, ['admin', 'moderator'], true))
+        <a href="{{ url('/admin') }}" class="font-medium text-red-600 font-extrabold"
+          >관리자메뉴</a
+        >
+      @endif      
     </div>
 
     <div class="flex items-center gap-3">
@@ -24,23 +29,77 @@
             <x-ui.badge>{{ $unreadNotificationCount }}</x-ui.badge>
           @endif
         </a>
-        <a href="{{ url('/mypage') }}" class="transition hover:text-zinc-900"
-          >마이페이지</a
-        >
-        @if (in_array(optional(auth()->user())->role, ['admin', 'moderator'], true))
-          <a href="{{ url('/admin') }}" class="font-medium text-red-600 font-extrabold"
-            >관리자메뉴</a
-          >
-        @endif
-        <form method="POST" action="{{ url('/logout') }}">
-          @csrf
+
+        <div x-data="{open: false}" class="relative">
           <button
-            type="submit"
-            class="font-medium text-rose-600 transition hover:text-rose-700"
+            type="button"
+            @click="open = !open"
+            class="flex items-center"
           >
-            로그아웃
+            <div class="relative flex h-10 w-10 min-h-10 min-w-10 flex-none items-center justify-center overflow-hidden rounded-full bg-stone-100 text-[10px] text-zinc-400 ring-1 ring-stone-200">
+              @if (auth()->user()->avatar)
+                <img
+                  src="{{ Storage::url(auth()->user()->avatar) }}"
+                  alt="프로필 이미지"
+                  class="absolute inset-0 h-full w-full object-cover"
+                >
+              @else
+                <span>없음</span>
+              @endif
+            </div>
           </button>
-        </form>
+
+          <div
+            x-show="open"
+            x-cloak
+            x-transition.opacity.scale.origin.top.right
+            @click.outside="open = false"
+            class="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-3 shadow-lg"
+          >
+            <div class="flex flex-col items-center gap-3 border-b border-stone-100 pb-3">
+              <div class="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-stone-100 text-xs text-zinc-400 ring-1 ring-stone-200">
+                @if (auth()->user()->avatar)
+                  <img
+                    src="{{ Storage::url(auth()->user()->avatar) }}"
+                    alt="프로필 이미지"
+                    class="absolute inset-0 h-full w-full object-cover"
+                  >
+                @else
+                  <span>없음</span>
+                @endif
+              </div>
+
+              <div class="space-y-1 text-center">
+                <p class="text-sm font-semibold text-zinc-900">
+                  {{ auth()->user()->name }}
+                </p>
+                <p class="text-xs text-zinc-500">
+                  {{ auth()->user()->email }}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <a
+                href="{{ route('mypage.index') }}"
+                class="inline-flex h-10 items-center justify-center rounded-xl border border-stone-200 px-3 text-sm text-zinc-700 transition hover:bg-stone-50"
+              >
+                마이페이지
+              </a>
+
+              <form method="POST" action="{{ url('/logout') }}" class="w-full">
+                @csrf
+                <button
+                  type="submit"
+                  class="inline-flex h-10 w-full items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 text-sm text-rose-600 transition hover:bg-rose-100"
+                >
+                  로그아웃
+                </button>
+              </form>
+            </div>            
+          </div>
+        </div>
+
       @else
         <a href="{{ url('/login') }}" class="transition hover:text-zinc-900"
           >로그인</a

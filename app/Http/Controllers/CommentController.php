@@ -7,6 +7,8 @@ use App\Models\Board;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\Post;
+use App\Notifications\RealTimeAlert;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
@@ -55,6 +57,14 @@ class CommentController extends Controller
                     'message' => $data[$contentField],
                     'link' => route('posts.show', [$post->board, $post]),
                 ]);
+
+                $post->user->notify(new RealTimeAlert([
+                    'type' => 'comment',
+                    'title' => '댓글이 달렸습니다.',
+                    'message' => $data[$contentField],
+                    'link' => route('posts.show', [$post->board, $post]),
+                    'sender_name' => auth()->user()->name,
+                ]));
             }
 
             if ($parent && $parent->user_id !== auth()->id()) {
@@ -65,6 +75,14 @@ class CommentController extends Controller
                     'message' => $data[$contentField],
                     'link' => route('posts.show', [$post->board, $post]),
                 ]);
+
+                $parent->user->notify(new RealTimeAlert([
+                    'type' => 'reply',
+                    'title' => '답글이 달렸습니다.',
+                    'message' => $data[$contentField],
+                    'link' => route('posts.show', [$post->board, $post]),
+                    'sender_name' => auth()->user()->name,
+                ]));
             }
 
         });
@@ -95,13 +113,13 @@ class CommentController extends Controller
             ->with('success', '댓글이 수정되었습니다.');            
     }
 
-    public function destroy(Board $board, Post $post, Comment $comment)
+    public function destroy(Board $board, Post $post, Comment $comment, Request $request)
     {
         abort_if(
             ! $board->isEnabled() || ! $post->isPublished() || ! $comment->isVisible(),
             404
         );
-
+        
         $this->authorize('delete', $comment);
 
         DB::transaction(function () use ($post, $comment) {
@@ -119,8 +137,7 @@ class CommentController extends Controller
             ]);
         });
 
-        return redirect()
-            ->route('posts.show', [$board, $post])
+        return redirect($request->input('redirect_to', route('posts.show', [$board, $post])))
             ->with('success', '댓글이 삭제되었습니다.');
     }
 }

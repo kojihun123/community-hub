@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AdminReportActionRequest;
 use App\Models\ModerationAction;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Report;
 use App\Models\UserSanction;
+use App\Notifications\RealTimeAlert;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -197,7 +199,15 @@ class AdminReportController extends Controller
 
     private function notifyReporter(Report $report, string $decision, string $handledNote): void
     {
-        $report->reporter?->notifications()->create([
+        if (! $report->reporter) {
+            return;
+        }
+
+        $link = $report->reportable instanceof Post
+            ? route('posts.show', [$report->reportable->board, $report->reportable])
+            : null;
+
+        $notification = [
             'type' => $decision === 'resolved' ? 'report_resolved' : 'report_rejected',
             'title' => $decision === 'resolved'
                 ? '신고가 처리되었습니다.'
@@ -207,7 +217,10 @@ class AdminReportController extends Controller
                     ? '회원님이 접수한 신고가 운영 검토 후 처리되었습니다.'
                     : '회원님이 접수한 신고가 검토 후 반려되었습니다.'
             ),
-        ]);
+            'link' => $link,
+        ];
+
+        $this->createAndBroadcastNotification($report->reporter, $notification);
     }
 
     private function notifyPostAuthor(Post $post, string $contentAction, string $handledNote): void
@@ -224,10 +237,11 @@ class AdminReportController extends Controller
             ? '운영 검토 결과 회원님의 게시글이 숨김 처리되었습니다.'
             : '운영 검토 결과 회원님의 게시글이 삭제 처리되었습니다.';
 
-        $post->user->notifications()->create([
+        $this->createAndBroadcastNotification($post->user, [
             'type' => 'post_moderated',
             'title' => $title,
             'message' => $handledNote ?: $defaultMessage,
+            'link' => route('mypage.posts'),
         ]);
     }
 
@@ -246,11 +260,31 @@ class AdminReportController extends Controller
             default => '운영 검토 결과 회원님 계정이 영구 정지되었습니다.',
         };
 
-        $user->notifications()->create([
+        $this->createAndBroadcastNotification($user, [
             'type' => 'user_sanction_applied',
             'title' => $title,
             'message' => $handledNote ?: $defaultMessage,
+            'link' => route('mypage.profile.edit'),
         ]);
+    }
+
+    private function createAndBroadcastNotification($user, array $payload): void
+    {
+        Notification::create([
+            'user_id' => $user->id,
+            'type' => $payload['type'],
+            'title' => $payload['title'],
+            'message' => $payload['message'] ?? '',
+            'link' => $payload['link'] ?? null,
+        ]);
+
+        $user->notify(new RealTimeAlert([
+            'type' => $payload['type'],
+            'title' => $payload['title'],
+            'message' => $payload['message'] ?? '',
+            'link' => $payload['link'] ?? null,
+            'sender_name' => auth()->user()->name,
+        ]));
     }
 
     private function resolveSanctionPreset(string $sanctionType): array

@@ -10,7 +10,7 @@
     </div>
 
     <div class="w-full space-y-4 xl:max-w-3xl">
-      <x-ui.section-card title="내정보">     
+      <x-ui.section-card title="내 정보">     
         <p class="text-sm text-zinc-500">
           내 프로필 정보를 수정합니다.
         </p>

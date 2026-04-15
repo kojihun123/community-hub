@@ -17,49 +17,48 @@
       @include('partials.mypage.sidebar')
     </div>
 
-    <div class="space-y-4">
+    <div class="w-full space-y-4 xl:max-w-3xl">
       <x-ui.section-card title="알림">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div class="space-y-1">
-            <p class="text-sm text-zinc-500">
-              운영 처리 결과와 커뮤니티 활동 알림을 한곳에서 확인할 수 있습니다.
-            </p>
-            <div class="inline-flex items-center rounded-xl border border-stone-200 bg-stone-50 p-1">
-              <a
-                href="{{ route('mypage.notifications.index', ['filter' => 'all']) }}"
-                class="{{ $tabBaseClass }} {{ $filter === 'all' ? $tabActiveClass : $tabInactiveClass }}"
-              >
-                전체
-              </a>
-
-              <a
-                href="{{ route('mypage.notifications.index', ['filter' => 'unread']) }}"
-                class="{{ $tabBaseClass }} {{ $filter === 'unread' ? $tabActiveClass : $tabInactiveClass }}"
-              >
-                읽지 않음
-              </a>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <form method="post" action="{{ route('mypage.notifications.read-all') }}" onsubmit="return confirm('모두 읽음 처리 하시겠습니까?')">
-              @csrf
-              @method('patch')
-
-              <x-ui.button type="submit" variant="outline" class="h-10 px-3 text-sm">
-                모두 읽음 처리
-              </x-ui.button>
-            </form>
-          </div>
-        </div>
+        <p class="text-sm text-zinc-500">
+          운영 처리 결과와 커뮤니티 활동 알림을 확인합니다.
+        </p>
       </x-ui.section-card>
 
-      <x-ui.section-card title="알림 목록" body-class="-mx-3 -mb-3">
-        <div class="space-y-4 px-3">
+      <x-ui.section-card title="" body-class="-mx-3 -mb-3">
+        <div class="space-y-4 border-b border-stone-200 bg-stone-50/70 px-4 py-3">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <p class="text-sm text-zinc-500">
-              최근 알림부터 순서대로 표시됩니다.
-            </p>
+            <div class="space-y-2">
+              <p class="text-sm text-zinc-500">
+                최근 알림부터 순서대로 표시됩니다.
+              </p>
+
+              <div class="inline-flex items-center rounded-xl border border-stone-200 bg-stone-50 p-1">
+                <a
+                  href="{{ route('mypage.notifications.index', ['filter' => 'all']) }}"
+                  class="{{ $tabBaseClass }} {{ $filter === 'all' ? $tabActiveClass : $tabInactiveClass }}"
+                >
+                  전체
+                </a>
+
+                <a
+                  href="{{ route('mypage.notifications.index', ['filter' => 'unread']) }}"
+                  class="{{ $tabBaseClass }} {{ $filter === 'unread' ? $tabActiveClass : $tabInactiveClass }}"
+                >
+                  읽지 않음
+                </a>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <form method="post" action="{{ route('mypage.notifications.read-all') }}" onsubmit="return confirm('모두 읽음 처리 하시겠습니까?')">
+                @csrf
+                @method('patch')
+
+                <x-ui.button type="submit" variant="outline" class="h-10 px-3 text-sm">
+                  모두 읽음 처리
+                </x-ui.button>
+              </form>
+            </div>
           </div>
         </div>
 

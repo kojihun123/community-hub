@@ -8,6 +8,7 @@ use App\Models\Board;
 use App\Models\Post;
 use App\Services\RecentBoardService;
 use DOMDocument;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -138,7 +139,7 @@ class PostController extends Controller
             ->with('success', '게시글이 수정되었습니다.');
     }
 
-    public function destroy(Board $board, Post $post)
+    public function destroy(Board $board, Post $post, Request $request)
     {
         abort_if(! $board->isEnabled() || ! $post->isPublished(), 404);
 
@@ -148,8 +149,7 @@ class PostController extends Controller
             'status' => 'deleted',
         ]);
 
-        return redirect()
-            ->route('boards.show', $board)
+        return redirect($request->input('redirect_to', route('boards.show', $board)))
             ->with('success', '게시글이 삭제되었습니다.');
     }
 

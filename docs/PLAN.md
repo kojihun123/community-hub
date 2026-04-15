@@ -276,25 +276,35 @@
 
 게시글 수정 페이지
 
-#### `/profile/{username}`
+#### `/mypage`
 
-사용자 프로필 페이지
+마이페이지 진입 경로
 
-- 기본 정보
-- 작성 글
-- 작성 댓글
+- 현재는 `/mypage/profile/edit`로 리다이렉트
 
-#### `/me/posts`
+#### `/mypage/profile/edit`
+
+내 정보 수정 페이지
+
+- 이름 수정
+- 프로필 이미지 수정
+- 자기소개 수정
+- 이메일 / 권한 / 상태 / 가입일 확인
+
+#### `/mypage/posts`
 
 내가 쓴 글 목록
 
-#### `/me/comments`
+#### `/mypage/comments`
 
 내가 쓴 댓글 목록
 
-#### `/notifications`
+#### `/mypage/notifications`
 
 알림 목록
+
+- 전체 / 읽지 않음 필터
+- 모두 읽음 처리
 
 ### Admin Pages
 

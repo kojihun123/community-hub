@@ -306,8 +306,8 @@
               </div>
               @endcan
 
-              @if (count($comment->children))
-                @foreach ($comment->children as $child)
+              @if (count($comment->visibleChildren))
+                @foreach ($comment->visibleChildren as $child)
 
                 <div
                   x-data="{ editing: @js((string) old('editing_comment_id') === (string) $child->id) }"

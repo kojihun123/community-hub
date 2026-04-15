@@ -44,4 +44,49 @@ class MyPageController extends Controller
             ->route('mypage.profile.edit')
             ->with('message', '프로필이 저장되었습니다.');
     }
+
+    public function myPosts()
+    {
+        $posts = auth()->user()->posts()
+            ->select([
+                'id',
+                'board_id',
+                'title',
+                'status',
+                'view_count',
+                'like_count',
+                'comment_count',
+                'created_at',
+            ])
+            ->with('board:id,name,slug') 
+            ->whereHas('board', function ($query){
+                $query->where('slug', '!=', 'notice');
+            })         
+            ->latest()
+            ->paginate(15);
+
+        return view('mypage.posts', compact('posts'));
+    }
+
+    public function myComments()
+    {
+        $comments = auth()->user()->comments()
+            ->select([
+                'id',
+                'post_id',
+                'parent_id',
+                'content',
+                'status',
+                'created_at',
+            ])
+            ->with([
+                'post:id,board_id,title,status',
+                'post.board:id,name,slug',
+            ])
+            ->latest()
+            ->paginate(15);
+
+        return view('mypage.comments', compact('comments'));
+    }
+
 }

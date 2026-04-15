@@ -12,13 +12,13 @@
       ],
       [
           'label' => '내가 쓴 글',
-          'href' => '#',
-          'active' => false,
+          'href' => route('mypage.posts'),
+          'active' => request()->routeIs('mypage.posts*'),
       ],
       [
           'label' => '내가 쓴 댓글',
-          'href' => '#',
-          'active' => false,
+          'href' => route('mypage.comments'),
+          'active' => request()->routeIs('mypage.comments*'),
       ],
   ];
 @endphp

@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\PopularPost;
 use App\Models\Post;
+use App\Services\OnlinePresenceService;
 use App\Services\RecentBoardService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
 {
-    public function index(RecentBoardService $recentBoardService)
+    public function index(
+        Request $request,
+        RecentBoardService $recentBoardService,
+        OnlinePresenceService $onlinePresenceService,
+    )
     {
         $popularItems = Cache::remember('home:popular_posts', now()->addMinute(), function () {
             return PopularPost::available()
@@ -50,6 +57,21 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        return view('home', compact('popularItems', 'recentBoards', 'noticePosts'));
+        $onlineCounts = $onlinePresenceService->touch(
+            $request->user(),
+            $request->session()->getId(),
+        );
+
+        return view('home', compact('popularItems', 'recentBoards', 'noticePosts', 'onlineCounts'));
+    }
+
+    public function heartbeat(Request $request, OnlinePresenceService $onlinePresenceService): JsonResponse
+    {
+        $onlineCounts = $onlinePresenceService->touch(
+            $request->user(),
+            $request->session()->getId(),
+        );
+
+        return response()->json($onlineCounts);
     }
 }
