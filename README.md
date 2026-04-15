@@ -1,102 +1,164 @@
-# 🚀 CommunityHub
 
-> **단순한 게시판을 넘어 실무적인 운영 로직을 담은 Laravel 커뮤니티 플랫폼**
+# CommunityHub
 
-CommunityHub는 Laravel 12를 기반으로 구축된 풀스택 커뮤니티 서비스입니다. 회원 간의 상호작용(게시글, 댓글, 좋아요, 신고)은 물론, 관리자의 운영 시스템(제재 이력 관리, 콘텐츠 숨김, 알림 송신)까지 실제 서비스 수준의 워크플로우를 구현하는 데 집중했습니다.
+> Laravel 기반 커뮤니티 플랫폼
 
----
-
-## 🛠 Tech Stack
-
-### Core
-* **Framework:** Laravel 12 (PHP 8.5)
-* **Frontend:** Blade, Alpine.js, Tailwind CSS
-* **Database:** MySQL 8.0
-* **Caching/Messaging:** Redis
-
-### Ecosystem & Tools
-* **Auth:** Laravel Breeze (Session based)
-* **Development:** Laravel Sail (Docker), Vite
-* **Real-time:** Laravel Reverb & Echo (Broadcasting)
-* **Testing:** PHPUnit
+CommunityHub는 Laravel 12를 기반으로 만든 커뮤니티 서비스입니다.  
+게시글, 댓글 같은 기본 기능에 더해 신고, 사용자 제재 등 운영 기능까지 포함해  
+단순 CRUD를 넘어 실제 서비스 구조를 구현하는 것을 목표로 개발했습니다.
 
 ---
 
-## ✨ Key Features
+## 왜 이 프로젝트를 만들었는가
 
-### 1. 커뮤니티 코어 (Community Core)
-* **계층형 게시판:** 상위 분류(`board_groups`)와 하위 게시판(`boards`) 구조의 유연한 설계.
-* **게시글/댓글:** CKEditor 기반 이미지 업로드, 무한 뎁스 대댓글(Self-referencing), 조회수 및 좋아요 토글.
-* **검색 및 필터:** 제목, 작성자, ID 기반 검색 및 성능 최적화를 위한 Eager Loading 적용.
+기존에 PHP 기반으로 개발을 해왔지만,  
+프레임워크를 활용한 구조적인 개발 경험이 부족하다고 느껴 Laravel을 학습하게 되었습니다.
 
-### 2. 운영 및 제재 시스템 (Moderation)
-* **신고 시스템:** 게시글에 대한 신고 접수 및 관리자 검토 프로세스.
-* **정교한 제재 로직:** 단순 삭제를 넘어 '경고', '기간 정지', '영구 정지' 등 제재 이력(`user_sanctions`) 관리.
-* **콘텐츠 관리:** 운영 조치(`moderation_actions`)를 통한 콘텐츠 숨김 처리 및 조치 사유 기록.
-
-### 3. 사용자 경험 (UX/Interaction)
-* **인기글 시스템:** 실시간 계산의 부담을 줄이기 위해 선정 이력(`popular_posts`) 테이블과 스케줄러, Redis 캐시를 결합한 구조.
-* **통합 알림:** 내 글의 반응(댓글, 좋아요) 및 운영 조치 결과에 대한 실시간 알림 제공.
-* **마이페이지:** 내가 쓴 글/댓글 모아보기, 최근 방문 게시판(Session/Service 기반) 추적.
+단순 기능 구현을 넘어 실제 서비스 구조를 이해하기 위해,  
+게시판뿐 아니라 운영 기능까지 포함한 커뮤니티 플랫폼을 직접 설계하고 구현했습니다.
 
 ---
 
-## 🔍 Technical Challenges & Resolutions
+## 🛠 기술 스택
 
-### 1. 효율적인 첨부파일 관리 (Temporary Attachments)
-에디터에서 이미지만 올리고 글 작성을 취소할 경우 발생하는 '고아 파일' 문제를 해결하기 위해 `is_temporary` 상태 관리를 도입했습니다.
-* **해결:** 업로드 시 임시 상태로 저장 후, 게시글 저장 시점에만 연결 확정. 미사용 파일은 Artisan 커맨드와 스케줄러를 통해 자동 정리하도록 설계했습니다.
-
-### 2. 복잡한 폼 UI의 데이터 충돌 방지
-한 화면에 댓글 작성, 수정, 답글 폼이 동시에 존재할 때 발생하는 `old()` 값 및 에러 메시지 혼선 문제를 해결했습니다.
-* **해결:** 필드명을 역할별(`comment_content`, `edit_content` 등)로 명시적으로 분리하고, `FormRequest` 내부 헬퍼 메서드로 유효성 검사 대상을 동적으로 할당했습니다.
-
-### 3. 중첩 라우트와 모델 바인딩 최적화
-`/boards/{board:slug}/{post}`와 같은 구조에서 부모-자식 관계 검증 코드가 컨트롤러에 반복되는 문제를 발견했습니다.
-* **해결:** Laravel의 `scopeBindings()`를 적용하여 라우팅 레벨에서 소속 관계를 보장함으로써 컨트롤러 로직을 획기적으로 단순화했습니다.
-
+- Laravel 12 (PHP)
+- Blade, Alpine.js, Tailwind CSS
+- MySQL
+- Redis
+- Laravel Sail (Docker)
+- Vite
+- PHPUnit
 
 ---
 
-## 🗄 Database Architecture
+## 📸 주요 화면
 
-* **Users:** 역할(`role`) 및 상태(`status`), 제재 종료일 관리.
-* **Posts/Comments:** 작성자 정보 유지를 위해 탈퇴 시에도 이름을 남기는 `author_name_snapshot` 기법 적용.
-* **Attachments:** 다형성 관계 대신 명확한 추적을 위해 게시글과 직접 연결 및 임시 상태 필드 보유.
-* **Moderation Tables:** `reports`, `moderation_actions`, `user_sanctions` 3단 구조로 운영 투명성 확보.
+### 홈
+<img src="./images/home.png" width="700"/>
 
----
+### 게시글 목록
+<img src="./images/post_list.png" width="700"/>
 
-## 🚀 Getting Started
+### 게시글 상세
+<img src="./images/post.png" width="700"/>
 
-1. **저장소 복제 및 환경 설정**
-   ```bash
-   git clone <repository-url>
-   cp .env.example .env
-   ```
-
-2. **Docker(Sail) 실행**
-   ```bash
-   ./vendor/bin/sail up -d
-   ./vendor/bin/sail composer install
-   ./vendor/bin/sail npm install
-   ```
-
-3. **키 생성 및 마이그레이션 (시더 포함)**
-   ```bash
-   ./vendor/bin/sail artisan key:generate
-   ./vendor/bin/sail artisan migrate --seed
-   ```
-
-4. **빌드 및 접속**
-   ```bash
-   ./vendor/bin/sail npm run dev
-   # 접속: http://localhost
-   ```
+### 관리자 (신고 처리)
+<img src="./images/admin.png" width="700"/>
 
 ---
 
-## 💡 Key Learnings
-* 반복되는 UI를 `x-ui.section-card` 등 Blade 컴포넌트로 공통화하며 유지보수 효율성을 경험했습니다.
-* 운영 데이터는 수정보다 **이력(History)을 쌓는 것**이 장애 대응과 CS 처리에 얼마나 중요한지 깨달았습니다.
-* 단순히 기능을 만드는 것보다 `Service` 계층 분리와 `Model Scope` 활용을 통해 **"읽기 좋은 코드"**를 만드는 법을 익혔습니다.
+## ✨ 주요 기능
+
+### 커뮤니티
+- 게시글 / 댓글 / 대댓글 CRUD
+- 게시판 및 카테고리 구조
+- 검색 및 페이지네이션
+
+### 상호작용
+- 좋아요
+- 조회수
+- 인기글 시스템
+- 알림
+
+### 운영
+- 게시글 신고
+- 콘텐츠 숨김 / 삭제
+- 사용자 제재 (경고 / 정지 / 차단)
+- 운영 이력 관리 및 알림
+
+---
+
+## 구현 포인트
+
+### 운영(Moderation) 구조
+신고 → 처리 → 제재 → 알림 흐름으로 연결되는 구조를 설계했습니다.
+
+- `reports`: 신고 접수
+- `moderation_actions`: 처리 이력
+- `user_sanctions`: 제재 관리
+- `notifications`: 사용자 알림
+
+---
+
+### 인기글 시스템
+실시간 정렬 대신, 조건을 만족한 게시글을 따로 저장하는 방식으로 구현했습니다.
+
+- `popular_posts` 테이블로 이력 관리
+- 홈에서는 해당 데이터를 기준으로 노출
+
+---
+
+### 파일 업로드 처리
+이미지 업로드 시 바로 연결하지 않고 임시 상태를 거쳐 처리했습니다.
+
+- `is_temporary`로 상태 관리
+- 게시글 저장 시에만 연결
+- 미사용 파일은 스케줄러로 정리
+
+---
+
+### 트랜잭션 처리
+게시글 생성과 첨부파일 연결을 하나의 트랜잭션으로 묶어  
+데이터 불일치가 발생하지 않도록 처리했습니다.
+
+---
+
+### 성능 고려
+- 인기글 캐시 (`Cache::remember`)
+- eager loading 적용
+- pagination 적용
+
+---
+
+## 문제 해결 경험
+
+### 이미지 업로드 후 남는 파일 문제
+글 작성 중 업로드된 이미지가 남는 문제를 해결하기 위해  
+임시 저장 → 실제 사용 시 연결 → 스케줄 정리 구조로 개선했습니다.
+
+---
+
+### 인기글 설계 문제
+실시간 점수 기반 정렬은 변동이 커서  
+선정 이력을 따로 관리하는 구조로 변경했습니다.
+
+---
+
+### 폼 데이터 충돌 문제
+댓글 작성 / 수정 / 답글 폼이 동시에 존재하면서  
+필드 값이 섞이는 문제가 있어 필드명을 분리해 해결했습니다.
+
+---
+
+## 🗄 데이터 구조
+
+- Users: 역할, 상태, 제재 정보 관리
+- Posts / Comments: 작성자 snapshot 유지
+- Attachments: 파일 및 임시 상태 관리
+- Moderation: 신고 / 처리 / 제재 이력 분리 구조
+
+---
+
+## 실행 방법
+
+```bash
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+````
+
+접속:
+
+* [http://localhost](http://localhost)
+* [http://localhost:8025](http://localhost:8025)
+
+---
+
+## 배운 점
+
+* 단순 CRUD를 넘어 운영 구조까지 고려하는 경험을 할 수 있었습니다.
+* 파일 업로드, 제재 시스템 등 실제 서비스에서 필요한 요소를 고민하며 구현했습니다.
+* Service 분리와 Model Scope를 활용해 코드 구조를 개선하는 방향으로 개발했습니다.
